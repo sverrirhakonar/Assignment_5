@@ -11,22 +11,26 @@ class Backtester:
 
     def run(self, prices: pd.Series):
         signals = self.strategy.signals(prices)
+        signals = signals.shift(1).fillna(0).astype(int)
+
         equity_curve = [] # will include [cash, posistion, total value at each instance]
-        for t in range(1, len(prices)):
-            signal = signals.iloc[t-1]
+
+        for t in range(len(prices)):
+            action = signals.iloc[t]
             price = prices.iloc[t]
-            if signal == 1:
+            if action == 1:
                 if self.broker.position == 0:
                     self.broker.market_order('BUY', 1, price)
-            elif signal == 0:
+            elif action == 0:
                 if self.broker.position != 0:
-                    self.broker.market_order('SELL', 1, price)
-            equity_curve.append([[self.broker.cash, self.broker.position, self.broker.cash + self.broker.position * price]])
-        return equity_curve
+                    self.broker.market_order('SELL', self.broker.position, price)
+            equity_curve.append([self.broker.cash, self.broker.position, self.broker.cash + self.broker.position * price])
+        return pd.DataFrame(equity_curve, columns=["cash", "position", "equity"], index=prices.index)
 
 
 
-p = load_market_data('market_data.csv')
+p = load_market_data('backtester/market_data.csv')
 b = Backtester()
 c = b.run(p.price)
 print(c)
+

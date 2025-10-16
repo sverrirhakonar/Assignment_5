@@ -46,7 +46,7 @@ def market_data_generator(
 
 def generate_market_csv(
     symbol: str,
-    start_price: float,
+    start_price: float, 
     filename: str,
     num_ticks: int = 100,
     volatility: float = 0.01,
@@ -89,7 +89,7 @@ if __name__ == "__main__":
         start_price=707.0,
         filename="market_data.csv",
         num_ticks=1000,
-        volatility=0.1,
-        interval=0.1
+        volatility=0.01,
+        interval=0.01
     )
     print("market_data.csv generated with 1000 ticks.")
