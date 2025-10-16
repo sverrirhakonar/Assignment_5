@@ -4,4 +4,14 @@ class Broker:
         self.position = 0
 
     def market_order(self, side: str, qty: int, price: float):
-        pass
+        if side == 'BUY':
+            if self.position == 0 and self.cash >= qty * price:
+                self.position += qty
+                self.cash -= qty * price
+        elif side == 'SELL':
+            if self.position >= qty:
+                self.position -= qty
+                self.cash += qty * price
+        else:
+            print('fucking do your shit')
+            
