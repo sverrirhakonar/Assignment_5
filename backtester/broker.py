@@ -5,7 +5,7 @@ class Broker:
 
     def market_order(self, side: str, qty: int, price: float):
         if side == 'BUY':
-            if self.position == 0 and self.cash >= qty * price:
+            if  self.cash >= qty * price:
                 self.position += qty
                 self.cash -= qty * price
         elif side == 'SELL':
