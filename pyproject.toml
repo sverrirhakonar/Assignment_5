@@ -1,11 +1,22 @@
 [tool.pytest.ini_options]
+minversion = "7.0"
 addopts = "-q"
+testpaths = ["tests"]
+pythonpath = ["."]
+# Uncomment to fail on warnings if you want:
+# filterwarnings = [
+#   "error"
+# ]
 
 [tool.coverage.run]
 branch = false
 source = ["backtester"]
+omit = [
+  "backtester/price_loader.py",
+  "backtester/data_generator.py",
+]
 
 [tool.coverage.report]
-show_missing = true
-skip_covered = true
 fail_under = 90
+show_missing = true
+skip_covered = false
