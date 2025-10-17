@@ -57,18 +57,37 @@ def test_head_nans_become_zeros():
 
     strat = VolatilityBreakoutStrategy(window=3)
     sig = strat.signals(prices)
-    print(sig)
 
-    # same length and index
     assert len(sig) == len(prices)
     assert (sig.index == prices.index).all()
-
-    # no NaNs in signals
     assert not sig.isna().any()
 
-    # the first two (where input was NaN) must produce 0 signals
     assert sig.iloc[0] == 0
     assert sig.iloc[1] == 0
+    assert sig.iloc[2] == 0
+    assert sig.iloc[3] == 0
 
-    # the rest must still be binary
     assert set(sig.iloc[2:].unique()).issubset({0, 1})
+
+def test_internal_nans_produce_0_in_the_window():
+    'If there is a nan in the prices then the signal at that index and all '
+    'signals that include the index in their window should produce the signal 0'
+    idx = pd.date_range("2025-01-01", periods=7, freq="D")
+    prices = pd.Series([1, 100, float('nan'), 102, 103, 101, 107,], index=idx)
+
+    strat = VolatilityBreakoutStrategy(window=3)
+    sig = strat.signals(prices)
+
+    assert (sig.iloc[2:6] == 0).all()
+    assert set(sig.unique()).issubset({0, 1})
+
+def test_const_price_returns_all_zeros():
+    'If we have flat prices then std = 0 and return = 0'
+    ' and we produce the signal 0 for all in that case'
+    idx = pd.date_range("2025-01-01", periods=6, freq="D")
+    prices = pd.Series([100, 100, 100, 100, 100, 100], index=idx)
+    strat = VolatilityBreakoutStrategy(window=4)
+    sig = strat.signals(prices)
+
+    assert (sig == 0).all()
+
