@@ -1,49 +1,46 @@
 import pytest
-import pandas as pd
-from backtester.broker import Broker
 
-def test_if_buy_updated_cash_and_pos():
-    """ Test that buying reduces cash and increases position correctly."""
-    some_broker = Broker(cash= 1000)
-    some_broker.market_order('BUY', 2, 200)
 
-    assert some_broker.cash == 600
-    assert some_broker.position == 2
+def test_buy_updates_cash_and_pos(broker):
+    broker.market_order("BUY", 2, 200)
+    assert broker.cash == 1000 - 400
+    assert broker.position == 2
 
-def test_if_sell_updated_cash_and_pos():
-    """ Test that selling reduces cash and increases position correctly."""
-    some_broker = Broker(cash= 1000)
-    some_broker.market_order('BUY', 2, 200)
+def test_sell_updates_cash_and_pos(broker):
+    # setup: own 2 shares
+    broker.market_order("BUY", 2, 200)
+    assert (broker.cash, broker.position) == (600, 2)
 
-    assert some_broker.cash == 600
-    assert some_broker.position == 2
+    # act: sell 1 at 150
+    broker.market_order("SELL", 1, 150)
+    assert broker.cash == 600 + 150   # 750
+    assert broker.position == 1
 
-    some_broker.market_order('SELL', 1, 150)
-
-    assert some_broker.cash == 750
-    assert some_broker.position == 1
-
-def test_rejects_invalid_orders():
-    """Broker should raise ValueError for bad inputs."""
-    broker = Broker(cash=1000)
-    with pytest.raises(ValueError): # Hold is not a signal so error
+def test_rejects_invalid_side(broker):
+    with pytest.raises(ValueError):
         broker.market_order("HOLD", 1, 100)
 
-    with pytest.raises(ValueError): # buy 0 shares? so error
+def test_rejects_nonpositive_qty(broker):
+    # qty <= 0 should raise for both sides
+    with pytest.raises(ValueError):
         broker.market_order("BUY", 0, 100)
+    with pytest.raises(ValueError):
+        broker.market_order("SELL", -1, 100)
 
-    with pytest.raises(ValueError): # sell at a negative price? so error
+def test_rejects_nonpositive_price(broker):
+    # price <= 0 should raise for both sides
+    with pytest.raises(ValueError):
+        broker.market_order("BUY", 1, 0)
+    with pytest.raises(ValueError):
         broker.market_order("SELL", 1, -50)
 
-def test_rejects_insufficient_cash():
-    """Broker should raise ValueError when buying without enough cash."""
-    broker = Broker(cash=1000)
+def test_rejects_insufficient_cash(broker):
+    # can’t afford 1 share at 1500 with $1000
     with pytest.raises(ValueError):
         broker.market_order("BUY", 1, 1500)
 
-def test_rejects_insufficient_shares():
-    """Broker should raise ValueError when selling more than position."""
-    broker = Broker(cash=1000)
-    broker.market_order("BUY", 1, 50)  # buy one share
+
+def test_rejects_insufficient_shares(broker):
+    broker.market_order("BUY", 1, 50)  # own 1
     with pytest.raises(ValueError):
         broker.market_order("SELL", 3, 50)  # try to oversell

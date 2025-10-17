@@ -1,7 +1,7 @@
 import pandas as pd
-from broker import Broker
-from strategy import VolatilityBreakoutStrategy
-from price_loader import load_market_data
+from backtester.broker import Broker
+from backtester.strategy import VolatilityBreakoutStrategy
+from backtester.price_loader import load_market_data
 
 class Backtester:
     def __init__(self, strategy = VolatilityBreakoutStrategy, broker = Broker):
