@@ -1,7 +1,6 @@
 # tests/test_engine.py
 import pandas as pd
 from unittest.mock import MagicMock
-
 from backtester.engine import Backtester
 
 def test_engine_trades_at_t_using_signal_from_t_minus_1(broker):
