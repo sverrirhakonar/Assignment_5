@@ -4,14 +4,24 @@ class Broker:
         self.position = 0
 
     def market_order(self, side: str, qty: int, price: float):
-        if side == 'BUY':
-            if  self.cash >= qty * price:
+        if side not in {"BUY", "SELL"}:
+            raise ValueError("Invalid order side")
+        if qty <= 0:
+            raise ValueError("Quantity must be positive")
+        if price <= 0:
+            raise ValueError("Price must be positive")
+        
+        if side == "BUY":
+            if self.cash >= qty * price:
                 self.position += qty
                 self.cash -= qty * price
-        elif side == 'SELL':
+            else:
+                raise ValueError("Not enough cash")
+
+        elif side == "SELL":
             if self.position >= qty:
                 self.position -= qty
                 self.cash += qty * price
-        else:
-            print('fucking do your shit')
+            else:
+                raise ValueError("Not enough shares")
             
