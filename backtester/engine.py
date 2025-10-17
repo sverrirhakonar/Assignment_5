@@ -29,8 +29,5 @@ class Backtester:
 
 
 
-p = load_market_data('backtester/market_data.csv')
-b = Backtester()
-c = b.run(p.price)
-print(c)
+
 

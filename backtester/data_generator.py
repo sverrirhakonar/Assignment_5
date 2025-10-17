@@ -6,6 +6,8 @@ import datetime
 import random
 import time
 import csv
+import math
+
 
 @dataclass(frozen=True)
 class MarketDataPoint:
@@ -17,7 +19,8 @@ def market_data_generator(
     symbol: str,
     start_price: float,
     volatility: float = 0.01,
-    interval: float = 0.1
+    interval: float = 0.1,
+    drift: float = 0.00005
 ):
     """
     Simulates a live market data feed for a given symbol using a
@@ -29,11 +32,15 @@ def market_data_generator(
     :param interval: Pause in seconds between ticks.
     :yield: MarketDataPoint(timestamp, symbol, price)
     """
-    price = start_price
+    price = float(start_price)
     while True:
-        delta = random.gauss(0, volatility)
-        price *= 1 + delta
-        price = round(price, 2)
+        # Generate a log-return instead of arithmetic return
+        Z = random.gauss(0, 1)
+        log_return = (drift - 0.5 * volatility**2) + volatility * Z
+        price *= math.exp(log_return)
+
+        # Keep it positive and realistic
+        price = max(0.01, round(price, 2))
 
         yield MarketDataPoint(
             timestamp=datetime.datetime.now(),
